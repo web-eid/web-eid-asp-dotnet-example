@@ -1,0 +1,117 @@
+﻿@page
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <title>Web eID: electronic ID smart cards on the Web</title>
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet" />
+    <link href="/css/main.css"
+          rel="stylesheet" />
+</head>
+<body class="m-4">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-xs-12 col-md-8">
+                <h2>Web eID: electronic ID smart cards on the Web</h2>
+                <p>
+                    The Web eID project enables usage of European Union electronic identity (eID) smart cards for
+                    secure authentication and digital signing of documents on the web using public-key cryptography.
+                </p>
+                <p>
+                    Estonian, Finnish, Latvian, Lithuanian and Croatian eID cards are supported in the first phase, but only
+                    Estonian eID card support is currently enabled in the test application below.
+                </p>
+                <p>
+                    Please get in touch by email at help@ria.ee in case you need support with adding Web eID to your project
+                    or want to add support for a new eID card to Web eID.
+                </p>
+
+                <hr />
+
+		<p>
+                    More information about the Web eID project, including installation and usage instructions
+                    is available on the project [website](https://web-eid.eu/).
+                </p>
+                <p>Click <i>Authenticate</i> below to test authentication and digital signing.</p>
+
+                <div id="error-message" class="alert alert-danger" style="display: none;" role="alert">
+                    <div class="message"></div>
+                    <pre class="details"></pre>
+                </div>
+                <p class="text-center p-4">
+                    <button id="webeid-auth-button" class="btn btn-info">Authenticate</button>
+                </p>
+
+                <p>
+                    The privacy policy of the test service is available <a href="/files/Web eID privacy policy.pdf">here</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="eu-logo-fixed" onmouseout="this.style.display = 'none'">
+        <img src="/img/eu-fund-flags.svg" alt="EU fund flags">
+    </div>
+
+    <script type="module">
+        "use strict";
+        import * as webeid from "/js/web-eid.js";
+        import { hideErrorMessage, showErrorMessage, checkHttpError } from "/js/errors.js";
+
+        hideErrorMessage();
+
+        const authButton = document.querySelector("#webeid-auth-button");
+
+        const lang = new URLSearchParams(window.location.search).get("lang") || "en";
+
+        authButton.addEventListener("click", async () => {
+            hideErrorMessage();
+            authButton.disabled = true;
+
+            try {
+                const challengeResponse = await fetch("/auth/challenge", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+                await checkHttpError(challengeResponse);
+                const { nonce } = await challengeResponse.json();
+
+                const authToken = await webeid.authenticate(nonce, { lang });
+
+                const authTokenResponse = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": "@Xsrf.GetAndStoreTokens(Request.HttpContext).RequestToken"
+                    },
+                    body: `{"auth-token": ${JSON.stringify(authToken)}}`
+                });
+                await checkHttpError(authTokenResponse);
+
+                console.log("Authentication successful!");
+
+                window.location.href = "/welcome";
+
+            } catch (error) {
+                showErrorMessage(error);
+                throw error;
+            } finally {
+                authButton.disabled = false;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                document.querySelector(".eu-logo-fixed").style.display = 'none'
+            }, 7000)
+        });
+        //# sourceURL=index.js
+    </script>
+</body>
+</html>
