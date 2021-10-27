@@ -1,0 +1,131 @@
+﻿@page
+@model WebEid.AspNetCore.Example.Pages.WelcomeModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <title>Welcome!</title>
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet" />
+    <link href="/css/main.css"
+          rel="stylesheet" />
+</head>
+<body class="m-4">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-xs-12 col-md-8" style="padding-top: 3rem;">
+                <div style="text-align: center">
+                    <h2 class="adding-signature">Digital signing</h2>
+                    <p class="welcome-line">Welcome, @Model.PrincipalName!</p>
+                </div>
+
+                <div id="file-name"></div>
+
+                <div id="example-document">
+                    <p class="p-4">
+                        To test digital signing, you can sign the following document by clicking
+                        <i>Sign document </i> below:
+                    </p>
+                    <iframe src="/files/example-for-signing.txt" width="100%" height="200"></iframe>
+                </div>
+
+                <div id="error-message" class="alert alert-danger" style="display: none;" role="alert">
+                    <div class="message"></div>
+                    <pre class="details"></pre>
+                </div>
+                <p class="text-center p-4">
+                    <button id="webeid-sign-button" class="btn btn-info">Sign document</button>
+                    <button id="webeid-download-button" class="btn btn-success" style="display: none;">
+                        Download container
+                    </button>
+                </p>
+            </div>
+            <button id="webeid-logout-button" class="btn btn-info">Logout</button>
+        </div>
+    </div>
+
+    <script type="module">
+        "use strict";
+        import * as webeid from "/js/web-eid.js";
+        import { hideErrorMessage, showErrorMessage, checkHttpError } from "/js/errors.js";
+
+        const signButton = document.querySelector("#webeid-sign-button");
+        const downloadButton = document.querySelector("#webeid-download-button");
+
+        const fileNameText = document.querySelector("#file-name");
+        const exampleDocument = document.querySelector("#example-document");
+
+        const logoutButton = document.querySelector("#webeid-logout-button");
+        logoutButton.addEventListener("click", async () => {
+            await fetch("/auth/logout", {
+                method: "GET",
+                headers: {
+                    "RequestVerificationToken": "@Xsrf.GetAndStoreTokens(Request.HttpContext).RequestToken"
+                }
+            });
+            window.location.href = "/";
+        });
+
+        downloadButton.addEventListener("click", async () => {
+            window.location.href = "/sign/download";
+        });
+
+        const lang = new URLSearchParams(window.location.search).get("lang") || "en";
+
+        signButton.addEventListener("click", async () => {
+            hideErrorMessage();
+            signButton.disabled = true;
+
+            try {
+                const {
+                    certificate,
+                    supportedSignatureAlgorithms,
+                } = await webeid.getSigningCertificate({ lang });
+
+                const prepareSigningResponse = await fetch("/sign/prepare", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": "@Xsrf.GetAndStoreTokens(Request.HttpContext).RequestToken"
+                    },
+                    body: JSON.stringify({ certificate, supportedSignatureAlgorithms }),
+                });
+                await checkHttpError(prepareSigningResponse);
+                const {
+                    hash,
+                    hashFunction
+                } = await prepareSigningResponse.json();
+
+                const {
+                    signatureAlgorithm,
+                    signature,
+                } = await webeid.sign(certificate, hash, hashFunction, { lang });
+
+                const finalizeSigningResponse = await fetch("/sign/sign", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": "@Xsrf.GetAndStoreTokens(Request.HttpContext).RequestToken"
+                    },
+                    body: JSON.stringify({ signature, signatureAlgorithm }),
+                });
+                await checkHttpError(finalizeSigningResponse);
+                const signResult = await finalizeSigningResponse.json();
+
+                signButton.setAttribute("style", "display: none;");
+                exampleDocument.setAttribute("style", "display: none;");
+                downloadButton.removeAttribute("style");
+                fileNameText.textContent = "Signature added: " + signResult.name;
+            } catch (error) {
+                showErrorMessage(error);
+                throw error;
+            } finally {
+                signButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

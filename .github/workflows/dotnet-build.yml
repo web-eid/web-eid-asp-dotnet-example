@@ -1,0 +1,40 @@
+name: Dotnet build
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x # SDK Version to use.
+
+      - name: Cache Nuget packages      
+        uses: actions/cache@v2
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: ${{ runner.os }}-nuget
+
+      - name: Install dependencies
+        run: dotnet restore src/WebEid.AspNetCore.Example.sln --source "https://gitlab.com/api/v4/projects/35362906/packages/nuget/index.json" --source "https://api.nuget.org/v3/index.json"
+
+      - name: Download digidoc
+        run: wget https://gitlab.com/api/v4/projects/35362906/packages/generic/digidoc/1.0.0/digidoc.zip
+
+      - name: Unzip digidoc
+        uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq digidoc.zip -d src/WebEid.AspNetCore.Example/DigiDoc
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore src/WebEid.AspNetCore.Example.sln --verbosity normal
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal src/WebEid.AspNetCore.Example.sln
