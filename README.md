@@ -42,7 +42,7 @@ Set up the `libdigidocpp` library as follows:
 
 1.  Install the _libdigidocpp-3.14.4.msi_ package or higher. The installation packages are available from  [https://github.com/open-eid/libdigidocpp/releases](https://github.com/open-eid/libdigidocpp/releases).
 2.  Copy the C# source files from the `libdigidocpp` installation folder `include\digidocpp_csharp` to the `src\WebEid.AspNetCore.Example\DigiDoc` folder.
-3.  Copy all files from `libdigidocpp` installation folder `x64` subfolder to the example application build output folder `bin\...\net60` (after building, see next step).
+3.  Copy all files from either the `x64` subfolder of the `libdigidocpp` installation folder to the example application build output folder `bin\...\net60` (after building, see next step). When building custom applications, choose `x64` if your application is 64-bit and `x86` if it is 32-bit.
 4.  When running in the `Development` profile, create an empty file named `EE_T.xml` for TSL cache as described in the [_Using test TSL lists_](https://github.com/open-eid/libdigidocpp/wiki/Using-test-TSL-lists#preconditions) section of the `libdigidocpp` wiki.
 
 Further information is available in the [libdigidocpp example C# application](https://github.com/open-eid/libdigidocpp/tree/master/examples/DigiDocCSharp) and in the [`libdigidocpp` wiki](https://github.com/open-eid/libdigidocpp/wiki).
@@ -101,3 +101,7 @@ See the [Web eID Java example application documentation](https://github.com/web-
 #### Why do I get the `System.ApplicationException: Failed to verify OCSP Responder certificate` error during signing?
 
 You are running in the `Development` profile, but you have not created an empty file named `EE_T.xml` for TSL cache. Creating the file is mandatory and is described in more detail in the [_Using test TSL lists_](https://github.com/open-eid/libdigidocpp/wiki/Using-test-TSL-lists#preconditions) section of the `libdigidocpp` wiki.
+
+#### Why do I get the `System.BadImageFormatException: An attempt was made to load a program with an incorrect format` error during signing?
+
+You are using `libdigidocpp` DLLs for the wrong architecture. Copy files from the `x64` subfolder of the  `libdigidocpp` installation folder to right place as described in the section _3. Setup the `libdigidocpp` library for signing_ above. In case you get this error while developing a custom 32-bit application, copy files from the `x86` subfolder instead.
