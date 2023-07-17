@@ -32,10 +32,22 @@ namespace WebEid.AspNetCore.Example.Pages
             var givenName = identity.Claims.Where(claim => claim.Type == ClaimTypes.GivenName)
                 .Select(claim => claim.Value)
                 .SingleOrDefault();
-            var surname = identity.Claims.Where(claim => claim.Type == ClaimTypes.Surname)
-                .Select(claim => claim.Value)
-                .SingleOrDefault();
-            return $"{givenName} {surname}";
+
+            if (!string.IsNullOrEmpty(givenName))
+            {
+                var surname = identity.Claims.Where(claim => claim.Type == ClaimTypes.Surname)
+                    .Select(claim => claim.Value)
+                    .SingleOrDefault();
+                return $"{givenName} {surname}";
+            }
+            else
+            {
+                // In case of organizations the Given Name and Surname are empty,
+                // and we use Common Name instead.
+                return identity.Claims.Where(claim => claim.Type == ClaimTypes.Name)
+                    .Select(claim => claim.Value)
+                    .SingleOrDefault();
+            }
         }
     }
 }
