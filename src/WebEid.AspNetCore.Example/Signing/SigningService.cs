@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
@@ -12,7 +13,7 @@
 
     public class SigningService
     {
-        private const string FileToSign = @"wwwroot\files\example-for-signing.txt";
+        private readonly string FileToSign;
         private readonly DigiDocConfiguration configuration;
         private readonly ILogger logger;
 
@@ -20,6 +21,10 @@
         {
             this.configuration = configuration;
             this.logger = logger;
+
+            // We use Path.Combine method here to make sure, correct
+            // directory separators are used on every platform.
+            FileToSign = Path.Combine("wwwroot", "files", "example-for-signing.txt");
         }
 
         public DigestDto PrepareContainer(CertificateDto data, ClaimsIdentity identity, string tempContainerName)
@@ -40,7 +45,7 @@
                 container.addDataFile(FileToSign, "application/octet-stream");
                 logger?.LogInformation("Preparing container for signing for file '{0}'", tempContainerName);
                 var signature =
-                    container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "BES/time-stamp");
+                    container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "time-stamp");
                 container.save();
                 return new DigestDto
                 {
@@ -65,7 +70,7 @@
                 var signatureBytes = Convert.FromBase64String(signatureDto.Signature);
                 var signature = container.signatures().First(); // Container must have one signature as it was added in PrepareContainer
                 signature.setSignatureValue(signatureBytes);
-                signature.extendSignatureProfile("BES/time-stamp");
+                signature.extendSignatureProfile("time-stamp");
                 container.save();
             }
             finally

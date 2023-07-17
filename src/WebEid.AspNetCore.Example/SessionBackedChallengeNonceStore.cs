@@ -30,5 +30,7 @@ namespace WebEid.AspNetCore.Example
             }
             return null;
         }
+
+        public ChallengeNonce GetAndRemove() => GetAndRemoveImpl();
     }
 }

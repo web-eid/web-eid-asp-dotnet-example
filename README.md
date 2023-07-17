@@ -24,7 +24,7 @@ One crucial step of the Web eID authentication token validation algorithm is ver
 To configure the origin URL, add `OriginUrl` field in the application settings file  `appsettings.json`  as follows:
 ```json
 {
-  "OriginUrl": "https://example.org"
+  "OriginUrl": "https://localhost:5001"
 }
 ```
 Note that the URL **must not end with a slash** `/`.
@@ -40,12 +40,21 @@ In case you need to provide your own CA certificates, add the `.cer` files to th
 
 Set up the `libdigidocpp` library as follows:
 
+#### For MS Windows
 1.  Install the _libdigidocpp-3.14.4.msi_ package or higher. The installation packages are available from  [https://github.com/open-eid/libdigidocpp/releases](https://github.com/open-eid/libdigidocpp/releases).
 2.  Copy the C# source files from the `libdigidocpp` installation folder `include\digidocpp_csharp` to the `src\WebEid.AspNetCore.Example\DigiDoc` folder.
 3.  Copy all files from either the `x64` subfolder of the `libdigidocpp` installation folder to the example application build output folder `bin\...\net60` (after building, see next step). When building custom applications, choose `x64` if your application is 64-bit and `x86` if it is 32-bit.
 4.  When running in the `Development` profile, create an empty file named `EE_T.xml` for TSL cache as described in the [_Using test TSL lists_](https://github.com/open-eid/libdigidocpp/wiki/Using-test-TSL-lists#preconditions) section of the `libdigidocpp` wiki.
 
-Further information is available in the [libdigidocpp example C# application](https://github.com/open-eid/libdigidocpp/tree/master/examples/DigiDocCSharp) and in the [`libdigidocpp` wiki](https://github.com/open-eid/libdigidocpp/wiki).
+#### For macOS
+1.  Build and install _libdigidocpp_ like described in [README.md](https://github.com/open-eid/libdigidocpp/blob/master/README.md). Installing of swig before building of _libdigidocpp_ is **mandatory**.
+2.  Copy the C# source files from `/Library/libdigidocpp/include/digidocpp_csharp` directory to `src/WebEid.AspNetCore.Example/DigiDoc` directory.
+3.  Go to `src/WebEid.AspNetCore.Example/bin/.../net60` directory and create symbolic link to `/Library/libdigidocpp/lib/libdigidoc_csharp.dylib` library:
+```cmd
+ln -s /Library/libdigidocpp/lib/libdigidoc_csharp.dylib
+```
+
+Further information is available in the [libdigidocpp example C# application](https://github.com/open-eid/libdigidocpp/tree/master/examples/DigiDocCSharp) and in the [`libdigidocpp` Wiki](https://github.com/open-eid/libdigidocpp/wiki).
 
 ### 4. Build the application
 
@@ -60,7 +69,7 @@ dotnet build
 
 If you have a test eID card, use the  `Development`  profile. In this case access to paid services is not required, but you need to upload the authentication and signing certificates of the test card to the test OCSP responder database as described in section _[Using DigiDoc4j in test mode with the  `dev`  profile](https://github.com/web-eid/web-eid-spring-boot-example#using-digidoc4j-in-test-mode-with-the-dev-profile)_ of the Web eID Java example application documentation. The`Development` profile is activated by default.
 
-If you only have a production eID card, use the  `Production`  profile. You can still test authentication without further configuration; however, for digital signing to work, you need access to a paid timestamping service as described in section [_Using DigiDoc4j in production mode with the  `prod`  profile_](https://github.com/web-eid/web-eid-spring-boot-example#using-digidoc4j-in-production-mode-with-the-prod-profile) of the Web eID Java example documentation.
+If you only have a production eID card, i.e., an eID card issued to real person or organization, use the  `Production`  profile. You can still test authentication without further configuration; however, for digital signing to work, you need access to a paid timestamping service as described in section [_Using DigiDoc4j in production mode with the  `prod`  profile_](https://github.com/web-eid/web-eid-spring-boot-example#using-digidoc4j-in-production-mode-with-the-prod-profile) of the Web eID Java example documentation.
 
 You can specify the profile as an environment variable `ASPNETCORE_ENVIRONMENT` when running the application. To set the profile for the current session before starting the app using [`dotnet run`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run), use the following command:
 ```cmd
