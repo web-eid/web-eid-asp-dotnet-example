@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.IO;
     using System.Security.Claims;
@@ -13,7 +14,7 @@
 
     public class SigningService
     {
-        private static readonly string FileToSign = Path.Combine("wwwroot", "files", "example-for-signing.txt");
+        private readonly string FileToSign;
         private readonly DigiDocConfiguration configuration;
         private readonly ILogger logger;
 
@@ -21,6 +22,10 @@
         {
             this.configuration = configuration;
             this.logger = logger;
+
+            // We use Path.Combine method here to make sure, correct
+            // directory separators are used on every platform.
+            FileToSign = Path.Combine("wwwroot", "files", "example-for-signing.txt");
         }
 
         public DigestDto PrepareContainer(CertificateDto data, ClaimsIdentity identity, string tempContainerName)
@@ -66,7 +71,7 @@
                 var signatureBytes = Convert.FromBase64String(signatureDto.Signature);
                 var signature = container.signatures().First(); // Container must have one signature as it was added in PrepareContainer
                 signature.setSignatureValue(signatureBytes);
-                signature.extendSignatureProfile("BES/time-stamp");
+                signature.extendSignatureProfile("time-stamp");
                 container.save();
             }
             finally
