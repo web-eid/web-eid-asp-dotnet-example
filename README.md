@@ -105,3 +105,93 @@ You are running in the `Development` profile, but you have not created an empty 
 #### Why do I get the `System.BadImageFormatException: An attempt was made to load a program with an incorrect format` error during signing?
 
 You are using `libdigidocpp` DLLs for the wrong architecture. Copy files from the `x64` subfolder of the  `libdigidocpp` installation folder to right place as described in the section _3. Setup the `libdigidocpp` library for signing_ above. In case you get this error while developing a custom 32-bit application, copy files from the `x86` subfolder instead.
+
+## Building and running with Docker on Ubuntu Linux
+
+This section covers the steps required to build the application on an Ubuntu Linux environment and run it using Docker.
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- .NET SDK 7.0
+- libdigidocpp-csharp
+
+You can install them using the following command:
+
+```sh
+sudo apt install dotnet-sdk-7.0 libdigidocpp-csharp
+```
+
+### Building the application
+
+To build the application, follow these steps:
+
+1. Navigate to the `src` directory:
+
+    ```sh
+    cd src
+    ```
+
+2. Copy the necessary DigiDoc C# library files into your project:
+
+    ```sh
+    cp /usr/include/digidocpp_csharp/* WebEid.AspNetCore.Example/DigiDoc/
+    ```
+
+3. Publish the application with the Release configuration:
+
+    ```sh
+    dotnet publish --configuration Release WebEid.AspNetCore.Example.sln
+    ```
+
+4. Update the `OriginUrl` in the `appsettings.json` to match your production environment:
+
+    ```sh
+    sed -i 's#"OriginUrl": "https://localhost:44391"#"OriginUrl": "https://example.com"#' WebEid.AspNetCore.Example/bin/Release/net6.0/publish/appsettings.json
+    ```
+
+### Building the Docker image
+
+After successfully building the application, you can create a Docker image:
+
+```sh
+docker build -t web-eid-asp-dotnet-example .
+```
+
+This command builds a Docker image named `web-eid-asp-dotnet-example` using the `Dockerfile` in the current directory.
+
+## Running the Docker container with HTTPS support
+
+To enable HTTPS support for the .NET application, you have two primary options:
+
+1. Directly configure Kestrel to use HTTPS by setting up the necessary certificate information in the app's configuration files. This method is detailed in the [ASP.NET Core documentation](https://docs.microsoft.com/aspnet/core/security/enforcing-ssl).
+
+2. Employ a reverse proxy that manages TLS termination and forwards requests to the application over HTTP. This is a common pattern in production environments due to its flexibility.
+
+In this project, we assume the application is running behind a reverse proxy.
+
+First, the proxy server must pass the `Host:` line from the incoming request to the proxied application and set the `X-Forwarded-*` headers to inform the application that it runs behind a reverse proxy. Here is example configuration for the Apache web server:
+
+    <Location />
+        ProxyPreserveHost On
+        ProxyPass http://localhost:8480/
+        ProxyPassReverse http://localhost:8480/
+        RequestHeader set X-Forwarded-Proto https
+        RequestHeader set X-Forwarded-Port 443
+    </Location>
+
+
+Next, the .NET application must be configured to recognize and honor the `X-Forwarded-*` headers. This can be done by configuring the Forwarded Headers middleware in `Startup.cs`:
+
+```csharp
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+```
+
+By default, this middleware is already enabled in the application.
+
+A Docker Compose configuration file `docker-compose.yml` is available in the `src` directory for running the Docker image `web-eid-asp-dotnet-example` on port 8480 behind a reverse proxy.
+

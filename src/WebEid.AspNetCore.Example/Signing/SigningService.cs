@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.IO;
     using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
     using digidoc;
@@ -12,7 +13,7 @@
 
     public class SigningService
     {
-        private const string FileToSign = @"wwwroot\files\example-for-signing.txt";
+        private static readonly string FileToSign = Path.Combine("wwwroot", "files", "example-for-signing.txt");
         private readonly DigiDocConfiguration configuration;
         private readonly ILogger logger;
 
@@ -40,7 +41,7 @@
                 container.addDataFile(FileToSign, "application/octet-stream");
                 logger?.LogInformation("Preparing container for signing for file '{0}'", tempContainerName);
                 var signature =
-                    container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "BES/time-stamp");
+                    container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "time-stamp");
                 container.save();
                 return new DigestDto
                 {
