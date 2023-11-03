@@ -4,6 +4,7 @@ namespace WebEid.AspNetCore.Example
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.HttpOverrides;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -102,6 +103,15 @@ namespace WebEid.AspNetCore.Example
             services.AddSingleton<IChallengeNonceGenerator, ChallengeNonceGenerator>();
 
             services.AddAntiforgery();
+
+            // Add support for running behind a TLS terminating proxy.
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                // Only use this if you're behind a known proxy:
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
         }
 
         private static Uri GetOriginUrl(IConfiguration configuration)
@@ -121,14 +131,16 @@ namespace WebEid.AspNetCore.Example
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseHttpsRedirection();
             }
             else
             {
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+                // Add support for running behind a TLS terminating proxy.
+                app.UseForwardedHeaders();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

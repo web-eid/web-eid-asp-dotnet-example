@@ -1,0 +1,8 @@
+version: '2'
+services:
+  web-eid-asp-dotnet-example:
+    image: registry.gitlab.com/web-eid/service/web-eid-authentication-token-validation-dotnet/web-eid-asp-dotnet-example
+    restart: always
+    ports:
+      - '127.0.0.1:8480:80'
+

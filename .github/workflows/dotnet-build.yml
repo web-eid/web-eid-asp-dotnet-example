@@ -34,7 +34,11 @@ jobs:
           args: unzip -qq digidoc.zip -d src/WebEid.AspNetCore.Example/DigiDoc
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore src/WebEid.AspNetCore.Example.sln --verbosity normal
+        run: dotnet publish --configuration Release --no-restore src/WebEid.AspNetCore.Example.sln --verbosity normal
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal src/WebEid.AspNetCore.Example.sln
+
+      - name: Test building Docker image
+        working-directory: ./src
+        run: docker build -t web-eid-asp-dotnet-example .
