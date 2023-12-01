@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
     <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
     <PackageReference Include="System.Text.Json" Version="6.0.3" />
-    <PackageReference Include="WebEid.Security" Version="1.0.0" />
+    <PackageReference Include="WebEid.Security" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
