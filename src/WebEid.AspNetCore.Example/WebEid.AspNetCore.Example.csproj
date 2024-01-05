@@ -23,13 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Certificates\Dev\TEST_of_ESTEID-SK_2015.cer">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Certificates\Dev\TEST_of_ESTEID2018.cer">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Certificates\Prod\ESTEID-SK_2015.cer">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Certificates\Prod\ESTEID2018.cer">
