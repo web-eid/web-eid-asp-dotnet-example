@@ -84,6 +84,8 @@ namespace WebEid.AspNetCore.Example
             services.AddSession(options =>
             {
                 options.Cookie.Name = "WebEid.AspNetCore.Example.Session";
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
                 options.IdleTimeout = TimeSpan.FromSeconds(60);
                 options.Cookie.IsEssential = true;
             });
