@@ -102,7 +102,10 @@ namespace WebEid.AspNetCore.Example
             services.AddSingleton<IChallengeNonceStore, SessionBackedChallengeNonceStore>();
             services.AddSingleton<IChallengeNonceGenerator, ChallengeNonceGenerator>();
 
-            services.AddAntiforgery();
+            services.AddAntiforgery(options =>
+            {
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
 
             // Add support for running behind a TLS terminating proxy.
             services.Configure<ForwardedHeadersOptions>(options =>
