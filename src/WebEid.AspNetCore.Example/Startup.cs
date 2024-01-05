@@ -67,7 +67,8 @@ namespace WebEid.AspNetCore.Example
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    options.Cookie.Name = "WebEid.AspNeCore.Example.Auth";
+                    options.Cookie.Name = "__Host-WebEid.AspNetCore.Example.Auth";
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Strict;
                     options.Events.OnRedirectToLogin = context =>
                     {
