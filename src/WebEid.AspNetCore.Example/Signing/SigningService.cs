@@ -42,11 +42,12 @@
                 logger?.LogInformation("Preparing container for signing for file '{0}'", tempContainerName);
                 var signature =
                     container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "time-stamp");
+                var hashFunction = GetSupportedHashAlgorithm(data.SupportedSignatureAlgorithms, signature.signatureMethod());
                 container.save();
                 return new DigestDto
                 {
                     Hash = Convert.ToBase64String(signature.dataToSign()),
-                    HashFunction = GetSupportedHashAlgorithm(data.SupportedSignatureAlgorithms)
+                    HashFunction = hashFunction
                 };
             }
             finally
@@ -75,15 +76,32 @@
             }
         }
 
-        private static string GetSupportedHashAlgorithm(IList<SignatureAlgorithmDto> supportedSignatureAlgorithms)
+        private static string GetSupportedHashAlgorithm(IList<SignatureAlgorithmDto> supportedSignatureAlgorithms, string signatureMethod)
         {
-            var algorithmNames = supportedSignatureAlgorithms.Select(a => a.HashFunction).ToArray();
-            return algorithmNames switch
+            var framgment = new Uri(signatureMethod).Fragment;
+            if (supportedSignatureAlgorithms.FirstOrDefault(algo => FragmentEquals(framgment, algo), null) is SignatureAlgorithmDto algo)
             {
-                var a when a.Contains("SHA-384") => "SHA-384",
-                var a when a.Contains("SHA-256") => "SHA-256",
-                _ => throw new ArgumentException("SHA-384 or SHA-256 algorithm must be supported")
-            };
+                return algo.HashFunction;
+            }
+            throw new ArgumentException("Supported signature algorithm not found");
         }
+
+        private static bool FragmentEquals(string framgent, SignatureAlgorithmDto signatureAlgorithm) =>
+            signatureAlgorithm switch
+            {
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-224" } => framgent == "#ecdsa-sha224",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-256" } => framgent == "#ecdsa-sha256",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-384" } => framgent == "#ecdsa-sha384",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-512" } => framgent == "#ecdsa-sha512",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-224" } => framgent == "#rsa-sha224",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-256" } => framgent == "#rsa-sha256",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-384" } => framgent == "#rsa-sha384",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-512" } => framgent == "#rsa-sha512",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-224" } => framgent == "#sha224-rsa-MGF1",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-256" } => framgent == "#sha256-rsa-MGF1",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-384" } => framgent == "#sha384-rsa-MGF1",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-512" } => framgent == "#sha512-rsa-MGF1",
+                _ => false
+            };
     }
 }
