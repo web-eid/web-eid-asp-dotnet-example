@@ -30,16 +30,23 @@
     using Microsoft.Extensions.Logging;
     using WebEid.Security.Util;
 
-    public class SigningService
+    public class SigningService : IDisposable
     {
         private static readonly string FileToSign = Path.Combine("wwwroot", "files", "example-for-signing.txt");
         private readonly DigiDocConfiguration configuration;
         private readonly ILogger logger;
+        private bool _disposedValue;
 
         public SigningService(DigiDocConfiguration configuration, ILogger logger)
         {
             this.configuration = configuration;
             this.logger = logger;
+            
+            // Current implementation of static digidoc assumes that SigningService is used as singleton
+            // in ASP.NET Core application we initialize it with AddSingleton method in Startup.cs
+            // digidoc is initialized in constructor and terminated in Dispose
+            configuration.Initialize();
+            digidoc.initialize("WebEidExample");
         }
 
         public DigestDto PrepareContainer(CertificateDto data, ClaimsIdentity identity, string tempContainerName)
@@ -50,49 +57,30 @@
                 throw new ArgumentException(
                     "Authenticated subject ID code differs from signing certificate subject ID code");
             }
-
-            configuration.Initialize();
-            digidoc.initialize("WebEidExample");
-            try
-            {
-                this.logger?.LogDebug("Creating container file: '{0}'", tempContainerName);
-                Container container = Container.create(tempContainerName);
-                container.addDataFile(FileToSign, "application/octet-stream");
-                logger?.LogInformation("Preparing container for signing for file '{0}'", tempContainerName);
-                var signature =
-                    container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "time-stamp");
+            
+            this.logger?.LogDebug("Creating container file: '{0}'", tempContainerName);
+            Container container = Container.create(tempContainerName);
+            container.addDataFile(FileToSign, "application/octet-stream");
+            logger?.LogInformation("Preparing container for signing for file '{0}'", tempContainerName);
+            var signature =
+                container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "time-stamp");
                 var hashFunction = GetSupportedHashAlgorithm(data.SupportedSignatureAlgorithms, signature.signatureMethod());
-                container.save();
-                return new DigestDto
-                {
-                    Hash = Convert.ToBase64String(signature.dataToSign()),
-                    HashFunction = hashFunction
-                };
-            }
-            finally
+            container.save();
+            return new DigestDto
             {
-                digidoc.terminate();
-            }
+                Hash = Convert.ToBase64String(signature.dataToSign()),
+                HashFunction = hashFunction
+            };
         }
-
 
         public void SignContainer(SignatureDto signatureDto, string tempContainerName)
         {
-            configuration.Initialize();
-            digidoc.initialize("WebEidExample");
-            try
-            {
-                var container = Container.open(tempContainerName);
-                var signatureBytes = Convert.FromBase64String(signatureDto.Signature);
-                var signature = container.signatures().First(); // Container must have one signature as it was added in PrepareContainer
-                signature.setSignatureValue(signatureBytes);
-                signature.extendSignatureProfile("BES/time-stamp");
-                container.save();
-            }
-            finally
-            {
-                digidoc.terminate();
-            }
+            var container = Container.open(tempContainerName);
+            var signatureBytes = Convert.FromBase64String(signatureDto.Signature);
+            var signature = container.signatures().First(); // Container must have one signature as it was added in PrepareContainer
+            signature.setSignatureValue(signatureBytes);
+            signature.extendSignatureProfile("BES/time-stamp");
+            container.save();
         }
 
         private static string GetSupportedHashAlgorithm(IList<SignatureAlgorithmDto> supportedSignatureAlgorithms, string signatureMethod)
@@ -122,5 +110,24 @@
                 { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-512" } => framgent == "#sha512-rsa-MGF1",
                 _ => false
             };
+        
+        ~SigningService() => Dispose(false);
+        
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing) {}
+
+                digidoc.terminate();
+                _disposedValue = true;
+            }
+        }
     }
 }
