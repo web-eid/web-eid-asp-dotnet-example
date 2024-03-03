@@ -42,9 +42,9 @@
             this.configuration = configuration;
             this.logger = logger;
             
-            // Current implementation of static digidoc assumes that SigningService is used as singleton
-            // in ASP.NET Core application we initialize it with AddSingleton method in Startup.cs
-            // digidoc is initialized in constructor and terminated in Dispose
+            // The current implementation of the static DigiDoc library assumes that SigningService is used as a singleton.
+            // In the ASP.NET Core application, we initialize it using the AddSingleton method in Startup.cs.
+            // The DigiDoc library is initialized in the constructor and terminated in Dispose.
             configuration.Initialize();
             digidoc.initialize("WebEidExample");
         }
@@ -123,7 +123,9 @@
         {
             if (!_disposedValue)
             {
-                if (disposing) {}
+                if (disposing) {
+                    // You can release managed resources here if needed.
+                }
 
                 digidoc.terminate();
                 _disposedValue = true;
