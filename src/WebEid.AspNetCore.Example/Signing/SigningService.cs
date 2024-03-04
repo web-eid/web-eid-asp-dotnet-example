@@ -74,21 +74,21 @@
             throw new ArgumentException("Supported signature algorithm not found");
         }
 
-        private static bool FragmentEquals(string framgent, SignatureAlgorithmDto signatureAlgorithm) =>
+        private static bool FragmentEquals(string fragment, SignatureAlgorithmDto signatureAlgorithm) =>
             signatureAlgorithm switch
             {
-                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-224" } => framgent == "#ecdsa-sha224",
-                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-256" } => framgent == "#ecdsa-sha256",
-                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-384" } => framgent == "#ecdsa-sha384",
-                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-512" } => framgent == "#ecdsa-sha512",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-224" } => framgent == "#rsa-sha224",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-256" } => framgent == "#rsa-sha256",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-384" } => framgent == "#rsa-sha384",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-512" } => framgent == "#rsa-sha512",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-224" } => framgent == "#sha224-rsa-MGF1",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-256" } => framgent == "#sha256-rsa-MGF1",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-384" } => framgent == "#sha384-rsa-MGF1",
-                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-512" } => framgent == "#sha512-rsa-MGF1",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-224" } => fragment == "#ecdsa-sha224",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-256" } => fragment == "#ecdsa-sha256",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-384" } => fragment == "#ecdsa-sha384",
+                { CryptoAlgorithm: "ECC", PaddingScheme: "NONE", HashFunction: "SHA-512" } => fragment == "#ecdsa-sha512",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-224" } => fragment == "#rsa-sha224",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-256" } => fragment == "#rsa-sha256",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-384" } => fragment == "#rsa-sha384",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PKCS1.5", HashFunction: "SHA-512" } => fragment == "#rsa-sha512",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-224" } => fragment == "#sha224-rsa-MGF1",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-256" } => fragment == "#sha256-rsa-MGF1",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-384" } => fragment == "#sha384-rsa-MGF1",
+                { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-512" } => fragment == "#sha512-rsa-MGF1",
                 _ => false
             };
         
