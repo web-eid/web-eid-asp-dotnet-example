@@ -22,7 +22,7 @@
         {
             this.configuration = configuration;
             this.logger = logger;
-            
+
             // The current implementation of the static DigiDoc library assumes that SigningService is used as a singleton.
             // In the ASP.NET Core application, we initialize it using the AddSingleton method in Startup.cs.
             // The DigiDoc library is initialized in the constructor and terminated in Dispose.
@@ -38,14 +38,14 @@
                 throw new ArgumentException(
                     "Authenticated subject ID code differs from signing certificate subject ID code");
             }
-            
+
             this.logger?.LogDebug("Creating container file: '{0}'", tempContainerName);
             Container container = Container.create(tempContainerName);
             container.addDataFile(FileToSign, "application/octet-stream");
             logger?.LogInformation("Preparing container for signing for file '{0}'", tempContainerName);
             var signature =
                 container.prepareWebSignature(certificate.Export(X509ContentType.Cert), "time-stamp");
-                var hashFunction = GetSupportedHashAlgorithm(data.SupportedSignatureAlgorithms, signature.signatureMethod());
+            var hashFunction = GetSupportedHashAlgorithm(data.SupportedSignatureAlgorithms, signature.signatureMethod());
             container.save();
             return new DigestDto
             {
@@ -91,9 +91,9 @@
                 { CryptoAlgorithm: "RSA", PaddingScheme: "PSS", HashFunction: "SHA-512" } => fragment == "#sha512-rsa-MGF1",
                 _ => false
             };
-        
+
         ~SigningService() => Dispose(false);
-        
+
         public void Dispose()
         {
             Dispose(true);
@@ -104,7 +104,8 @@
         {
             if (!_disposedValue)
             {
-                if (disposing) {
+                if (disposing)
+                {
                     // You can release managed resources here if needed.
                 }
 
