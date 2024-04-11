@@ -47,6 +47,10 @@
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
+            
+            // Assign a unique ID within the session to enable the use of a unique temporary container name across successive requests.
+            // A unique temporary container name is required to facilitate simultaneous signing from multiple browsers.
+            SetUniqueIdInSession();
         }
 
         [HttpGet]
