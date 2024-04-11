@@ -19,22 +19,32 @@
 
 ﻿namespace WebEid.AspNetCore.Example.Controllers.Api
 {
-    using System.Security;
-    using System.Security.Claims;
+    using System;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
     public abstract class BaseController : ControllerBase
     {
+        const string uniqueIdKey = "UniqueId";
+
         protected void RemoveUserContainerFile()
         {
             System.IO.File.Delete(GetUserContainerName());
         }
 
+        protected void SetUniqueIdInSession() 
+        {
+            HttpContext.Session.SetString(uniqueIdKey, Guid.NewGuid().ToString());
+        }
+
+        private string GetUniqueIdFromSession() 
+        {
+            return HttpContext.Session.GetString(uniqueIdKey);
+        }
+
         protected string GetUserContainerName()
         {
-            var identity = (ClaimsIdentity)this.HttpContext.User?.Identity ??
-                           throw new SecurityException("User is not logged in");
-            return identity.GetIdCode();
+            return $"container_{GetUniqueIdFromSession()}";
         }
     }
 }
