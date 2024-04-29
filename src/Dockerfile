@@ -13,7 +13,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/ria-repository.gpg] https://install
     apt-get clean && \
     rm -rf /var/lib/apt/lists
 
-COPY ./WebEid.AspNetCore.Example/bin/Release/net6.0/publish/ .
+COPY ./WebEid.AspNetCore.Example/bin/x64/Release/net6.0/publish/ .
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 
