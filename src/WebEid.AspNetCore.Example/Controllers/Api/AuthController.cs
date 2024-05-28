@@ -78,7 +78,7 @@ namespace WebEid.AspNetCore.Example.Controllers.Api
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        private void AddNewClaimIfCertificateHasData(List<Claim> claims, string claimType, Func<string> dataGetter) 
+        private static void AddNewClaimIfCertificateHasData(List<Claim> claims, string claimType, Func<string> dataGetter) 
         {
             var claimData = dataGetter();
             if (!string.IsNullOrEmpty(claimData))
