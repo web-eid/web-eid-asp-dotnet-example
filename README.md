@@ -54,25 +54,35 @@ Set up the `libdigidocpp` library as follows:
 #### For Ubuntu Linux
 
 1. Add RIA repository to install the official _libdigidocpp-csharp_ package:
-```sh
-wget https://github.com/web-eid/web-eid-asp-dotnet-example/raw/main/src/ria_public_key.gpg
-cp ria_public_key.gpg /usr/share/keyrings/ria-repository.gpg
-echo "deb [signed-by=/usr/share/keyrings/ria-repository.gpg] https://installer.id.ee/media/ubuntu/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/ria-repository.list
-```
+    ```sh
+    wget https://github.com/web-eid/web-eid-asp-dotnet-example/raw/main/src/ria_public_key.gpg
+    cp ria_public_key.gpg /usr/share/keyrings/ria-repository.gpg
+    echo "deb [signed-by=/usr/share/keyrings/ria-repository.gpg] https://installer.id.ee/media/ubuntu/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/ria-repository.list
+    ```
 2. Install the _libdigidocpp-csharp_ package:
-```sh
-apt update
-apt install -y --no-install-recommends libdigidocpp-csharp
-```
+    ```sh
+    apt update
+    apt install -y --no-install-recommends libdigidocpp-csharp
+    ```
+3. Navigate to the `src` directory:
+
+    ```sh
+    cd src
+    ```
+4. Copy the necessary DigiDoc C# library files into your project:
+
+    ```sh
+    cp /usr/include/digidocpp_csharp/* WebEid.AspNetCore.Example/DigiDoc/
+    ```
 
 #### For macOS
 
 1.  Install the _libdigidocpp-3.14.4.pkg_ package or higher. The installation packages are available from  [https://github.com/open-eid/libdigidocpp/releases](https://github.com/open-eid/libdigidocpp/releases).
 2.  Copy the C# source files from `/Library/libdigidocpp/include/digidocpp_csharp` directory to `src/WebEid.AspNetCore.Example/DigiDoc` directory.
 3.  Go to `src/WebEid.AspNetCore.Example/bin/.../net60` directory and create symbolic link to `/Library/libdigidocpp/lib/libdigidoc_csharp.dylib` library:
-```cmd
-ln -s /Library/libdigidocpp/lib/libdigidoc_csharp.dylib
-```
+    ```cmd
+    ln -s /Library/libdigidocpp/lib/libdigidoc_csharp.dylib
+    ```
 
 Further information is available in the [libdigidocpp example C# application source code](https://github.com/open-eid/libdigidocpp/tree/master/examples/DigiDocCSharp) and in the [`libdigidocpp` Wiki](https://github.com/open-eid/libdigidocpp/wiki).
 
@@ -151,6 +161,8 @@ You can install them using the following command:
 ```sh
 sudo apt install dotnet-sdk-7.0 libdigidocpp-csharp
 ```
+
+Note: Before installing `libdigidocpp-csharp` you have to have added the RIA repository as a package source. See [For Ubuntu Linux section](#for-ubuntu-linux) for information.
 
 ### Building the application
 
