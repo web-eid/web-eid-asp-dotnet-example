@@ -1,5 +1,5 @@
-# We're using .NET 6 now, but when we migrate to .NET 8 in the future, we should use chiseled images.
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-jammy
+# In the future, we should use chiseled images.
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/ria-repository.gpg] https://install
     apt-get clean && \
     rm -rf /var/lib/apt/lists
 
-COPY ./WebEid.AspNetCore.Example/bin/Release/net6.0/publish/ .
+COPY ./WebEid.AspNetCore.Example/bin/Release/net8.0/publish/ .
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 
