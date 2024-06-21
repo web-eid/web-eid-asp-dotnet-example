@@ -17,7 +17,7 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-﻿namespace WebEid.AspNetCore.Example.Controllers.Api
+namespace WebEid.AspNetCore.Example.Controllers.Api
 {
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
@@ -29,6 +29,7 @@
     using System.Threading.Tasks;
     using Security.Challenge;
     using WebEid.AspNetCore.Example.Dto;
+    using System;
 
     [Route("[controller]")]
     [ApiController]
@@ -48,12 +49,13 @@
         public async Task Login([FromBody] AuthenticateRequestDto authToken)
         {
             var certificate = await this.authTokenValidator.Validate(authToken.AuthToken, this.challengeNonceStore.GetAndRemove().Base64EncodedNonce);
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.GivenName, certificate.GetSubjectGivenName()),
-                new Claim(ClaimTypes.Surname, certificate.GetSubjectSurname()),
-                new Claim(ClaimTypes.NameIdentifier, certificate.GetSubjectIdCode())
-            };
+
+            List<Claim> claims = new();
+
+            AddNewClaimIfCertificateHasData(claims, ClaimTypes.GivenName, certificate.GetSubjectGivenName);
+            AddNewClaimIfCertificateHasData(claims, ClaimTypes.Surname, certificate.GetSubjectSurname);
+            AddNewClaimIfCertificateHasData(claims, ClaimTypes.NameIdentifier, certificate.GetSubjectIdCode);
+            AddNewClaimIfCertificateHasData(claims, ClaimTypes.Name, certificate.GetSubjectCn);
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -66,6 +68,10 @@
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
+            
+            // Assign a unique ID within the session to enable the use of a unique temporary container name across successive requests.
+            // A unique temporary container name is required to facilitate simultaneous signing from multiple browsers.
+            SetUniqueIdInSession();
         }
 
         [HttpGet]
@@ -73,8 +79,16 @@
         public async Task Logout()
         {
             RemoveUserContainerFile();
-            await HttpContext.SignOutAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        private static void AddNewClaimIfCertificateHasData(List<Claim> claims, string claimType, Func<string> dataGetter) 
+        {
+            var claimData = dataGetter();
+            if (!string.IsNullOrEmpty(claimData))
+            {
+                claims.Add(new Claim(claimType, claimData));
+            }
         }
     }
 }
