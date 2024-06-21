@@ -64,7 +64,7 @@ apt install -y --no-install-recommends libdigidocpp-csharp
 
 #### For macOS
 
-1.  Install the _libdigidocpp-3.14.4.pkg_ package or higher. The installation packages are available from  [https://github.com/open-eid/libdigidocpp/releases](https://github.com/open-eid/libdigidocpp/releases).
+1.  Install the _libdigidocpp-3.17.1.pkg_ package or higher. The installation packages are available from  [https://github.com/open-eid/libdigidocpp/releases](https://github.com/open-eid/libdigidocpp/releases).
 2.  Copy the C# source files from `/Library/libdigidocpp/include/digidocpp_csharp` directory to `src/WebEid.AspNetCore.Example/DigiDoc` directory.
 3.  Go to `src/WebEid.AspNetCore.Example/bin/.../net60` directory and create symbolic link to `/Library/libdigidocpp/lib/libdigidoc_csharp.dylib` library:
 ```cmd
