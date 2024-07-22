@@ -13,14 +13,43 @@ The ASP.NET web application makes use of the following technologies:
 -   the Web eID JavaScript library [_web-eid.js_](https://github.com/web-eid/web-eid.js),
 -   the digital signing library [_libdigidocpp_](https://github.com/open-eid/libdigidocpp/tree/master/examples/DigiDocCSharp).
 
-Note that for including the Web eID authentication token validation library as a nuget package you need to have added a Package Source with the following address to the NuGet Package Manager:
-https://gitlab.com/api/v4/projects/35362906/packages/nuget/index.json
-
 ## Quickstart
 
 Complete the steps below to run the example application in order to test authentication and digital signing with Web eID.
 
-### 1. Configure the origin URL
+### 1. Add the Web eID authentication token validation library to your project
+
+#### When using Visual Studio
+
+1. Configure Web eID GitLab package repository as a NuGet package source.  
+   In MS Visual Studio, go to the **Tools** > **NuGet Package Manager** > **Package Manager Settings** menu command. Select **Package Sources** and add a new source. Name it _Web eID GitLab_ and set the _Source_ URL to `https://gitlab.com/api/v4/projects/35362906/packages/nuget/index.json`.
+
+2. Install the `WebEid.Security` NuGet package.  
+   You can install the package either from the GUI or the Package Manager Console.
+
+  - From GUI:  
+    Right-click the project in the Solution Explorer where you want to install the Web eID dependency. Select **Manage NuGet Packages**. Choose the _Web eID GitLab_ package source you added earlier from the _Package source_ dropdown. Then, install the `WebEid.Security` package.
+     
+
+  - From Package Manager Console:  
+    Run the following command:
+    ```
+    Install-Package WebEid.Security
+    ```
+
+#### When using `dotnet` CLI
+
+In case you prefer using command line tools, you can add the package using the `dotnet` CLI with the following command:
+
+```
+dotnet add package WebEid.Security --source https://gitlab.com/api/v4/projects/35362906/packages/nuget/index.json
+```
+
+**Note:** When you install a package, NuGet records the dependency in either your project file or a `packages.config` file, depending on the selected package management format (`Packages.config` or `PackageReference`).
+
+For more detailed information on different methods of installing NuGet packages, refer to [Microsoft's official documentation](https://learn.microsoft.com/en-us/nuget/consume-packages/overview-and-workflow#ways-to-install-a-nuget-package).
+
+### 2. Configure the origin URL
 
 One crucial step of the Web eID authentication token validation algorithm is verifying the token signature. The value that is signed contains the site origin URL (the URL serving the web application) to protect against man-in-the-middle attacks. Hence the site origin URL must be configured in application settings.
 
@@ -32,13 +61,13 @@ To configure the origin URL, add `OriginUrl` field in the application settings f
 ```
 Note that the URL **must not end with a slash** `/`.
 
-### 2. Configure the trusted certificate authority certificates
+### 3. Configure the trusted certificate authority certificates
 
 The algorithm, which performs the validation of the Web eID authentication token, needs to know which intermediate certificate authorities (CA) are trusted to issue the eID authentication certificates. CA certificates are loaded from `.cer` files in the profile-specific subdirectory of the  [`Certificates` resource directory](https://github.com/web-eid/web-eid-asp-dotnet-example/src/WebEid.AspNetCore.Example/Certificates). By default, Estonian eID test CA certificates are included in the `Development` profile and production CA certificates in the `Production` profile.
 
 In case you need to provide your own CA certificates, add the `.cer` files to the  `src/WebEid.AspNetCore.Example/Certificates/{Dev,Prod}` profile-specific directory.
 
-### 3. Setup the `libdigidocpp` library for signing
+### 4. Setup the `libdigidocpp` library for signing
 
 `libdigidocpp` is a library for creating, signing and verifying digitally signed documents according to XAdES and XML-DSIG standards. It is a C++ library that has [SWIG](http://swig.org/) bindings for C#.
 
@@ -86,7 +115,7 @@ Set up the `libdigidocpp` library as follows:
 
 Further information is available in the [libdigidocpp example C# application source code](https://github.com/open-eid/libdigidocpp/tree/master/examples/DigiDocCSharp) and in the [`libdigidocpp` Wiki](https://github.com/open-eid/libdigidocpp/wiki).
 
-### 4. Build the application
+### 5. Build the application
 
 You need to have the [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed for building the application package.
 Build the application by running the following command in a terminal window under the `src` directory:
@@ -95,7 +124,7 @@ Build the application by running the following command in a terminal window unde
 dotnet build
 ```
 
-### 5. Choose either the  `Development`  or  `Production`  profile
+### 6. Choose either the  `Development`  or  `Production`  profile
 
 If you have a test eID card, use the  `Development`  profile. In this case access to paid services is not required, but you need to upload the authentication and signing certificates of the test card to the test OCSP responder database as described in section _[Using DigiDoc4j in test mode with the  `dev`  profile](https://github.com/web-eid/web-eid-spring-boot-example#using-digidoc4j-in-test-mode-with-the-dev-profile)_ of the Web eID Java example application documentation. The`Development` profile is activated by default.
 
@@ -106,7 +135,7 @@ You can specify the profile as an environment variable `ASPNETCORE_ENVIRONMENT` 
 set ASPNETCORE_ENVIRONMENT=Production
 ```
 
-### 6. Run the application
+### 7. Run the application
 
 Run the application with the following command in a terminal window under the `src` directory:
 
