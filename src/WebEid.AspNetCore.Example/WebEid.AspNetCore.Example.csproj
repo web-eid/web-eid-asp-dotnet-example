@@ -24,10 +24,16 @@
 
   <ItemGroup>
     <None Update="Certificates\Dev\TEST_of_ESTEID2018.cer">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Certificates\Prod\ESTEID2018.cer">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Certificates\Prod\KLASS3-SK_2016_EECCRCA_SHA384.cer">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Certificates\Dev\TEST_of_KLASS3-SK_2016.cer">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
