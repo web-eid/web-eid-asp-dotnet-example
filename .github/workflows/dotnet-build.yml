@@ -25,13 +25,23 @@ jobs:
       - name: Install dependencies
         run: dotnet restore src/WebEid.AspNetCore.Example.sln --source "https://gitlab.com/api/v4/projects/35362906/packages/nuget/index.json" --source "https://api.nuget.org/v3/index.json"
 
-      - name: Download digidoc
-        run: wget https://gitlab.com/api/v4/projects/35362906/packages/generic/digidoc/1.0.0/digidoc.zip
+      - name: Download RIA repository public key
+        run: wget https://github.com/web-eid/web-eid-asp-dotnet-example/raw/main/src/ria_public_key.gpg
+        
+      - name: Copy RIA repository key to keyrings
+        run: sudo cp ria_public_key.gpg /usr/share/keyrings/ria-repository.gpg
+        
+      - name: Add RIA repository to APT
+        run: |
+            echo "deb [signed-by=/usr/share/keyrings/ria-repository.gpg] https://installer.id.ee/media/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/ria-repository.list
+        
+      - name: Update APT and install libdigidocpp-csharp
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends libdigidocpp-csharp
 
-      - name: Unzip digidoc
-        uses: montudor/action-zip@v1
-        with:
-          args: unzip -qq digidoc.zip -d src/WebEid.AspNetCore.Example/DigiDoc
+      - name: Copy the necessary DigiDoc C# library files
+        run: sudo cp /usr/include/digidocpp_csharp/* src/WebEid.AspNetCore.Example/DigiDoc/
 
       - name: Build
         run: dotnet publish --configuration Release --no-restore src/WebEid.AspNetCore.Example.sln --verbosity normal
