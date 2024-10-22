@@ -79,7 +79,7 @@
             var signatureBytes = Convert.FromBase64String(signatureDto.Signature);
             var signature = container.signatures().First(); // Container must have one signature as it was added in PrepareContainer
             signature.setSignatureValue(signatureBytes);
-            signature.extendSignatureProfile("BES/time-stamp");
+            signature.extendSignatureProfile("time-stamp");
             container.save();
         }
 
