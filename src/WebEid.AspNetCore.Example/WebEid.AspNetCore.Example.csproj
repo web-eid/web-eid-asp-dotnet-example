@@ -8,6 +8,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AssemblyName>WebEid.AspNetCore.Example</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
