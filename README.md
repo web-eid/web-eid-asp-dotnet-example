@@ -2,6 +2,9 @@
 
 ![European Regional Development Fund](https://github.com/open-eid/DigiDoc4-Client/blob/master/client/images/EL_Regionaalarengu_Fond.png)
 
+**NB! Please note that the Web eID ASP.NET example code was moved to the web-eid-authtoken-validation-dotnet repository.<br>
+We won't be accepting pull requests or responding to issues in this repository anymore. We are happy to accept your proposals in the web-eid-authtoken-validation-dotnet repository: https://github.com/web-eid/web-eid-authtoken-validation-dotnet.**
+
 This project is an example ASP.NET web application that shows how to implement strong authentication and digital signing with electronic ID smart cards using Web eID.
 
 More information about the Web eID project is available on the project [website](https://web-eid.eu/).
